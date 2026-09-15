@@ -26,7 +26,7 @@ jobs:
       - name: Install and test Norm
         run: |
           $manifest = Get-Content bucket/normlang.json -Raw | ConvertFrom-Json
-          scoop install ./bucket/normlang.json
+          scoop install (Resolve-Path bucket/normlang.json).Path
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $version = norm --version
           if ($LASTEXITCODE -ne 0 -or $version -ne "norm $($manifest.version)") { throw "Unexpected Norm version: $version" }
