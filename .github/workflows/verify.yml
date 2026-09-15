@@ -1,0 +1,41 @@
+name: Verify Bucket
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Scoop
+        run: |
+          Invoke-WebRequest https://raw.githubusercontent.com/ScoopInstaller/Install/1e2f334083d609986d8c8bc9e31ae8e87c39fab4/install.ps1 -OutFile "$env:RUNNER_TEMP/install-scoop.ps1"
+          & "$env:RUNNER_TEMP/install-scoop.ps1"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "$env:USERPROFILE/scoop/shims" >> $env:GITHUB_PATH
+      - name: Install and test Norm
+        run: |
+          $manifest = Get-Content bucket/normlang.json -Raw | ConvertFrom-Json
+          scoop install ./bucket/normlang.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $version = norm --version
+          if ($LASTEXITCODE -ne 0 -or $version -ne "norm $($manifest.version)") { throw "Unexpected Norm version: $version" }
+          Invoke-WebRequest "https://raw.githubusercontent.com/normlanguage/Norm/v$($manifest.version)/cli/compiler/scripts/fixtures/hello.norm" -OutFile "$env:RUNNER_TEMP/hello.norm"
+          $output = norm run "$env:RUNNER_TEMP/hello.norm"
+          if ($LASTEXITCODE -ne 0 -or $output -ne 'Hello from Norm') { throw "Norm source execution failed: $output" }
+      - name: Verify removal
+        run: |
+          scoop uninstall normlang
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (Test-Path "$env:USERPROFILE/scoop/apps/normlang") { throw 'Norm installation remains' }
+          if (Test-Path "$env:USERPROFILE/scoop/shims/norm.exe") { throw 'Norm shim remains' }
