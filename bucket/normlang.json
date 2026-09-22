@@ -1,12 +1,12 @@
 {
-  "version": "0.23.2",
+  "version": "0.24.0",
   "description": "Statically typed programming language and toolchain",
   "homepage": "https://github.com/normlanguage/Norm",
   "license": "MPL-2.0",
   "architecture": {
     "64bit": {
-      "url": "https://github.com/normlanguage/Norm/releases/download/v0.23.2/norm.exe",
-      "hash": "6ef839d4837ecd9709164db9dd8c25e97f12ead855ff2a2dea07d83e1475dddc"
+      "url": "https://github.com/normlanguage/Norm/releases/download/v0.24.0/norm.exe",
+      "hash": "562c59e6e871b278be234cbfc8743747d49c90ff89cd93bd5a90849e40687d9e"
     }
   },
   "bin": "norm.exe",
